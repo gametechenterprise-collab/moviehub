@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MovieHub - Your Streaming Destination</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0f1a;
+            color: #ffffff;
+        }
+
+        /* Custom scrollbar for a more premium feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a1c24;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+
+        /* Style for the movie card overlay */
+        .library-card-overlay {
+            background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0) 100%);
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .library-card:hover .library-card-overlay {
+            opacity: 1;
+        }
+
+        .library-card:hover .play-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .play-icon {
+            transition: all 0.2s ease-in-out;
+        }
+
+        #modal-backdrop {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .episode-item:hover {
+            background-color: #1e293b;
+        }
+        .season-tab.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-gradient-to-b from-gray-900 to-transparent p-4 sm:p-6">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-wider">
+                <span class="text-blue-500">Movie</span>Hub
+            </h1>
+            <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-semibold transition-colors">Sign In</button>
+        </div>
+    </header>
+
+    <main id="main-content">
+        <!-- Hero Section -->
+        <section class="relative h-[60vh] sm:h-[80vh] -mt-[72px] sm:-mt-[88px] flex items-center justify-center text-center">
+            <div class="absolute inset-0 bg-black opacity-60"></div>
+            <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2525&auto=format&fit=crop" 
+                 alt="Featured Movie Background" 
+                 class="absolute inset-0 w-full h-full object-cover">
+            <div class="relative z-10 p-4">
+                <h2 class="text-4xl md:text-6xl font-black text-white leading-tight mb-4">Your Favorite Content, All in One Place.</h2>
+                <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+                    Stream from a vast library of movies and shows directly from Google Drive.
+                </p>
+            </div>
+        </section>
+
+        <!-- TV Show Library Section -->
+        <section class="container mx-auto px-4 sm:px-6 py-12">
+            <h3 class="text-2xl sm:text-3xl font-bold text-white mb-6">Popular Shows</h3>
+            <div id="show-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+                <!-- Show cards will be dynamically inserted here -->
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="container mx-auto px-6 py-8 text-center text-gray-500">
+        <p>&copy; 2025 MovieHub. All Rights Reserved.</p>
+        <p class="text-sm mt-2">This is a conceptual project. Not a real streaming service.</p>
+    </footer>
+
+    <!-- Video Player Modal -->
+    <div id="video-modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div id="modal-backdrop" class="absolute inset-0 bg-black bg-opacity-80"></div>
+        <div id="modal-content" class="relative w-11/12 max-w-6xl bg-gray-900 rounded-xl shadow-2xl transform transition-all scale-95 opacity-0">
+             <button id="close-modal" class="absolute -top-4 -right-4 h-10 w-10 bg-white text-gray-800 rounded-full flex items-center justify-center z-20 hover:bg-gray-200 transition-transform hover:scale-110">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <div id="modal-body" class="flex flex-col lg:flex-row gap-4 p-4 max-h-[90vh]">
+                <div class="flex-grow lg:w-2/3 bg-black rounded-lg overflow-hidden">
+                     <div class="aspect-w-16 aspect-h-9 w-full h-full">
+                        <iframe id="video-player" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+                <div id="modal-sidebar" class="lg:w-1/3 flex flex-col">
+                     <h3 id="modal-title" class="text-2xl font-bold mb-2 flex-shrink-0"></h3>
+                     <div id="seasons-tabs" class="flex border-b border-gray-700 mb-2 flex-shrink-0"></div>
+                     <div id="episodes-list" class="flex-grow overflow-y-auto pr-2"></div>
+                </div>
+             </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- MASTER LIBRARY DATABASE ---
+            const library = [
+                // TV Shows
+                {
+                    type: 'show',
+                    id: 7,
+                    title: 'Dexter',
+                    posterUrl: 'data:image/jpeg;base64,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',
+                    seasons: [
+                        {
+                            season: 1,
+                            episodes: [
+                                { title: '1. Dexter', googleDriveId: '198Nlo6KvxiJtqkndm-z6bumG7QFt7sT3' },
+                                { title: '2. Crocodile', googleDriveId: '1EfPZ8I5t_tN-C4GziegXCxv5dksylFTm' },
+                                { title: '3. Popping Cherry', googleDriveId: '16X8ZoX-bqoxHjGHuKco_1tEOjbq_IXaz' },
+                                { title: '4. Let\'s Give the Boy a Hand', googleDriveId: '1pfLbvpe-5pSWLE5CCqIUb1PCbfL6dK8A' },
+                                { title: '5. Love American Style', googleDriveId: '1GYzMEU-779fzoaPQvNSDgNy_yRLtPr6g' },
+                                { title: '6. Return to Sender', googleDriveId: '1XdgcjbsbdKzO52L2_2z6CzJsXp4_jkup' },
+                                { title: '7. Circle of Friends', googleDriveId: '1zpZK4tFUM4Bw9nBWc-EXi7TZF9p4XbCN' },
+                                { title: '8. Shrink Wrap', googleDriveId: '1WReyZ4jnqq-qrHlFr6tPd2KUJVSpyqom' },
+                                { title: '9. Father Knows Best', googleDriveId: '14UFuqqt1_tSBH4ieSlUxpkoHV7nEacvW' },
+                                { title: '10. Seeing Red', googleDriveId: '1XtMCtTUC-vyS_QFVy4fg3XW-ImpeGO2O' },
+                                { title: '11. Truth Be Told', googleDriveId: '1B1I_8pv1orUsOyr_xoD8b5t4j-mfNuEv' },
+                                { title: '12. Born Free', googleDriveId: '1mgMKqp30ZHkgXSYIPF9uHZbW2GP78ige' },
+                            ]
+                        },
+                        {
+                            season: 2,
+                            episodes: [
+                                { title: '1. It\'s Alive!', googleDriveId: '1S_FyZ13TLGRrzuTerSrnSAHyxkJiYHkL' },
+                                { title: '2. Waiting to Exhale', googleDriveId: '1hVUAEsSeXVZnaZVXyLu1kKofWOFgm-Jf' },
+                                { title: '3. An Inconvenient Lie', googleDriveId: '11CzvAElzAoSPZI5Qkj7xCzaJvhcARRwL' },
+                                { title: '4. See-Through', googleDriveId: '1yI8jDwj58Ozlbf_Zcz7xGQEZo_8lrzts' },
+                                { title: '5. The Dark Defender', googleDriveId: '1rvdmWYi5-L9AqfoIL9Yi7uuIoHKtL533' },
+                                { title: '6. Dex, Lies, and Videotape', googleDriveId: '1ccr0xPNk4K_XGuNG2h-iesaRqRHQf6px' },
+                                { title: '7. That Night, a Forest Grew', googleDriveId: '1k6jCgMhSuk_QgTXR_MU-6LI10jumPwga' },
+                                { title: '8. Morning Comes', googleDriveId: '1w0jYo3AZvmligMOpQMw12HUXuyXXdwKy' },
+                                { title: '9. Resistance Is Futile', googleDriveId: '1BNg6Fqd4xJyVy02arJDstKco9JAZUBK4' },
+                                { title: '10. The British Invasion', googleDriveId: '1mq4xwA-iKsfopNlUQvZ1eTmd3ZEVn9hC' },
+                                { title: '11. Left Turn Ahead', googleDriveId: '1d7XYdFZCFxSRr2ZykeBXAxDDvIqSKLp6' },
+                                { title: '12. The British Invasion', googleDriveId: '1-aRrpxS-x4ibnsCpz8eilh2hv5LjaH2-' },
+                            ]
+                        }
+                    ]
+                }
+            ];
+
+            const showGrid = document.getElementById('show-grid');
+            const modal = document.getElementById('video-modal');
+            const modalContent = document.getElementById('modal-content');
+            const closeModalBtn = document.getElementById('close-modal');
+            const modalBackdrop = document.getElementById('modal-backdrop');
+            const videoPlayer = document.getElementById('video-player');
+            const mainContent = document.getElementById('main-content');
+            const modalSidebar = document.getElementById('modal-sidebar');
+            const modalTitle = document.getElementById('modal-title');
+            const seasonsTabsContainer = document.getElementById('seasons-tabs');
+            const episodesListContainer = document.getElementById('episodes-list');
+
+            function createLibraryCard(item) {
+                const card = document.createElement('div');
+                card.className = 'library-card relative rounded-lg overflow-hidden cursor-pointer group transform hover:-translate-y-2 transition-transform duration-300 shadow-lg bg-gray-800 aspect-[2/3]';
+                card.dataset.libraryId = item.id;
+
+                card.innerHTML = `
+                    <img src="${item.posterUrl}" alt="${item.title}" class="w-full h-full object-cover">
+                    <div class="library-card-overlay absolute inset-0 opacity-0 flex items-end p-4">
+                        <h4 class="text-white text-lg font-bold">${item.title}</h4>
+                    </div>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                        <div class="play-icon opacity-0 text-white bg-black bg-opacity-50 rounded-full h-16 w-16 flex items-center justify-center transition-all duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+                `;
+                return card;
+            }
+
+            function populateLibrary() {
+                showGrid.innerHTML = '';
+                library.forEach(item => {
+                     if (item.type === 'show') {
+                        const card = createLibraryCard(item);
+                        showGrid.appendChild(card);
+                    }
+                });
+            }
+
+            function renderEpisodes(episodes) {
+                episodesListContainer.innerHTML = '';
+                episodes.forEach(episode => {
+                    const episodeItem = document.createElement('div');
+                    episodeItem.className = 'episode-item p-3 rounded-lg cursor-pointer transition-colors';
+                    episodeItem.textContent = episode.title;
+                    episodeItem.addEventListener('click', () => {
+                        playVideo(episode.googleDriveId);
+                    });
+                    episodesListContainer.appendChild(episodeItem);
+                });
+            }
+
+            function playVideo(videoId) {
+                 if (!videoId || videoId.startsWith('REPLACE_WITH_YOUR_ID')) {
+                    alert('Video not available. Please replace the placeholder ID.');
+                    videoPlayer.src = '';
+                    return;
+                }
+                const embedUrl = `https://drive.google.com/file/d/${videoId}/preview`;
+                videoPlayer.src = embedUrl;
+            }
+
+            function openModal(itemId) {
+                const item = library.find(i => i.id == itemId);
+                if (!item) return;
+                
+                // Clear previous state
+                seasonsTabsContainer.innerHTML = '';
+                episodesListContainer.innerHTML = '';
+
+                if (item.type === 'movie') {
+                    modalSidebar.classList.add('hidden');
+                    playVideo(item.googleDriveId);
+                } else if (item.type === 'show') {
+                    modalSidebar.classList.remove('hidden');
+                    modalTitle.textContent = item.title;
+
+                    item.seasons.forEach((season, index) => {
+                        const tab = document.createElement('button');
+                        tab.className = 'season-tab py-2 px-4 border-b-2 border-transparent transition-colors text-gray-400 hover:text-white';
+                        tab.textContent = `Season ${season.season}`;
+                        if (index === 0) {
+                           tab.classList.add('active');
+                           renderEpisodes(season.episodes);
+                           playVideo(season.episodes[0].googleDriveId);
+                        }
+                        tab.addEventListener('click', () => {
+                            // Update active tab style
+                            seasonsTabsContainer.querySelector('.active').classList.remove('active');
+                            tab.classList.add('active');
+                            // Render episodes for this season
+                            renderEpisodes(season.episodes);
+                        });
+                        seasonsTabsContainer.appendChild(tab);
+                    });
+                }
+                
+                modal.classList.remove('hidden');
+                mainContent.style.filter = 'blur(10px)';
+                
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                }, 50);
+            }
+
+            function closeModal() {
+                videoPlayer.src = '';
+                modalContent.classList.add('scale-95', 'opacity-0');
+                modalContent.classList.remove('scale-100', 'opacity-100');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    mainContent.style.filter = 'none';
+                }, 300);
+            }
+
+            document.body.addEventListener('click', (e) => {
+                const card = e.target.closest('.library-card');
+                if (card && card.dataset.libraryId) {
+                    openModal(card.dataset.libraryId);
+                }
+            });
+
+            closeModalBtn.addEventListener('click', closeModal);
+            modalBackdrop.addEventListener('click', closeModal);
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+            });
+
+            populateLibrary();
+        });
+    </script>
+</body>
+</html>
+
+
+
